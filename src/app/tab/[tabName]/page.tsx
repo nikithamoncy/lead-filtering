@@ -9,8 +9,10 @@ export default function TabDashboard({ params }: { params: Promise<{ tabName: st
   const [rows, setRows] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionInProgress, setActionInProgress] = useState<string | null>(null);
-  const [batchSize, setBatchSize] = useState(20);
   const [stage1BatchSize, setStage1BatchSize] = useState(100);
+  const [stage2BatchSize, setStage2BatchSize] = useState(20);
+  const [stage3BatchSize, setStage3BatchSize] = useState(20);
+  const [stage4BatchSize, setStage4BatchSize] = useState(20);
   const [page, setPage] = useState(1);
   const rowsPerPage = 100;
   const fetchRows = async () => {
@@ -33,7 +35,7 @@ export default function TabDashboard({ params }: { params: Promise<{ tabName: st
 
   const runStage = async (stage: string) => {
     setActionInProgress(stage);
-    const size = stage === 'stage1' ? stage1BatchSize : stage === 'archive' ? 100 : batchSize;
+    const size = stage === 'stage1' ? stage1BatchSize : stage === 'stage2' ? stage2BatchSize : stage === 'stage3' ? stage3BatchSize : stage === 'stage4' ? stage4BatchSize : 100;
     try {
       const res = await fetch(`/api/pipeline/${stage}`, {
         method: 'POST',
@@ -109,7 +111,7 @@ export default function TabDashboard({ params }: { params: Promise<{ tabName: st
             <p className="text-sm text-gray-500 mb-4">{stage2Pending} pending</p>
             <div className="mb-4">
               <label className="text-xs text-gray-500 block mb-1">Batch Size</label>
-              <select value={batchSize} onChange={e => setBatchSize(Number(e.target.value))} className="w-full border rounded p-1 text-sm">
+              <select value={stage2BatchSize} onChange={e => setStage2BatchSize(Number(e.target.value))} className="w-full border rounded p-1 text-sm">
                 <option value={10}>10</option>
                 <option value={20}>20</option>
                 <option value={50}>50</option>
@@ -130,6 +132,15 @@ export default function TabDashboard({ params }: { params: Promise<{ tabName: st
           <div>
             <h3 className="font-semibold mb-2">3. Website Discovery</h3>
             <p className="text-sm text-gray-500 mb-4">{stage3Pending} pending</p>
+            <div className="mb-4">
+              <label className="text-xs text-gray-500 block mb-1">Batch Size</label>
+              <select value={stage3BatchSize} onChange={e => setStage3BatchSize(Number(e.target.value))} className="w-full border rounded p-1 text-sm">
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+            </div>
           </div>
           <button 
             disabled={!!actionInProgress || stage3Pending === 0}
@@ -144,6 +155,15 @@ export default function TabDashboard({ params }: { params: Promise<{ tabName: st
           <div>
             <h3 className="font-semibold mb-2">4. Booking Detection</h3>
             <p className="text-sm text-gray-500 mb-4">{stage4Pending} pending</p>
+            <div className="mb-4">
+              <label className="text-xs text-gray-500 block mb-1">Batch Size</label>
+              <select value={stage4BatchSize} onChange={e => setStage4BatchSize(Number(e.target.value))} className="w-full border rounded p-1 text-sm">
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+            </div>
           </div>
           <button 
             disabled={!!actionInProgress || stage4Pending === 0}
