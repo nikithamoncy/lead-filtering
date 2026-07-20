@@ -17,14 +17,11 @@ export default async function Home() {
     );
   }
 
-  // Filter out archive tabs from the main view
-  const workingTabs = tabs.filter(t => !t.title.endsWith('_Archive'));
-
   return (
     <main className="p-8 max-w-5xl mx-auto font-sans bg-gray-50 min-h-screen text-gray-900">
       <h1 className="text-3xl font-bold mb-8 text-gray-800">Lead Filtering & Qualification</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {workingTabs.map(tab => (
+        {tabs.map(tab => (
           <Link href={`/tab/${encodeURIComponent(tab.title)}`} key={tab.id} className="block group">
             <div className="border border-gray-200 rounded-xl p-6 hover:shadow-md transition bg-white h-full">
               <h2 className="text-xl font-semibold mb-2 group-hover:text-blue-600 transition">{tab.title}</h2>
