@@ -1,0 +1,52 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { getRows, getWorksheetByTitle } from '@/lib/sheets';
+
+export async function POST(request: NextRequest) {
+  try {
+    const { tabName, batchSize = 100 } = await request.json();
+    if (!tabName) {
+      return NextResponse.json({ success: false, error: 'Missing tabName parameter' }, { status: 400 });
+    }
+
+    const sheet = await getWorksheetByTitle(tabName);
+    if (!sheet) {
+      return NextResponse.json({ success: false, error: 'Tab not found' }, { status: 404 });
+    }
+    
+    // Ensure the header exists
+    await sheet.loadHeaderRow();
+    
+    const rows = await getRows(tabName);
+    let processedCount = 0;
+
+    for (const row of rows) {
+      if (processedCount >= batchSize) break;
+      
+      // Resumability Guarantee: Only process if 'Rating Status' is blank
+      if (row.get('Rating Status')) {
+        continue;
+      }
+
+      const rating = parseFloat(row.get('Review Star'));
+      const reviewCount = parseInt(row.get('Review'), 10);
+      
+      let pass = false;
+      if (!isNaN(rating) && !isNaN(reviewCount)) {
+        if (rating >= 4.5 && reviewCount >= 50) {
+          pass = true;
+        }
+      }
+
+      row.set('Rating Status', pass ? 'Pass' : 'Fail');
+      row.set('Enrichment Date', new Date().toISOString());
+      
+      await row.save();
+      processedCount++;
+    }
+
+    return NextResponse.json({ success: true, processedCount });
+  } catch (error: any) {
+    console.error('Error running stage 1:', error);
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+}
