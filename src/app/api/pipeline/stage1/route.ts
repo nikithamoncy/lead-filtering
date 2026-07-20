@@ -32,7 +32,13 @@ export async function POST(request: NextRequest) {
       
       let pass = false;
       if (!isNaN(rating) && !isNaN(reviewCount)) {
-        if (rating >= 4.5 && reviewCount >= 50) {
+        if (reviewCount >= 200 && rating >= 4.0) {
+          pass = true;
+        } else if (reviewCount >= 150 && rating >= 4.1) {
+          pass = true;
+        } else if (reviewCount >= 100 && rating >= 4.3) {
+          pass = true;
+        } else if (reviewCount >= 50 && rating >= 4.5) {
           pass = true;
         }
       }

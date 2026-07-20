@@ -3,7 +3,7 @@ import { getRows, getWorksheetByTitle, getGoogleDoc } from '@/lib/sheets';
 
 export async function POST(request: NextRequest) {
   try {
-    const { tabName } = await request.json();
+    const { tabName, batchSize = 100 } = await request.json();
     if (!tabName) return NextResponse.json({ success: false, error: 'Missing tabName' }, { status: 400 });
 
     const doc = await getGoogleDoc();
@@ -29,6 +29,7 @@ export async function POST(request: NextRequest) {
     // Process backwards to allow deletion without affecting indices of subsequent rows
     // google-spreadsheet v4 rows can be deleted using row.delete()
     for (let i = rows.length - 1; i >= 0; i--) {
+      if (archivedCount >= batchSize) break;
       const row = rows[i];
       const ratingStatus = row.get('Rating Status');
       const socialStatus = row.get('Social Status');

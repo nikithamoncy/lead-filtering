@@ -33,7 +33,7 @@ export default function TabDashboard({ params }: { params: Promise<{ tabName: st
 
   const runStage = async (stage: string) => {
     setActionInProgress(stage);
-    const size = stage === 'stage1' ? stage1BatchSize : batchSize;
+    const size = stage === 'stage1' ? stage1BatchSize : stage === 'archive' ? 100 : batchSize;
     try {
       const res = await fetch(`/api/pipeline/${stage}`, {
         method: 'POST',
@@ -167,7 +167,7 @@ export default function TabDashboard({ params }: { params: Promise<{ tabName: st
             }}
             className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-700 disabled:opacity-50"
           >
-            Archive Failed Rows ({toArchive})
+            Archive Failed Rows (up to 100 at a time, total {toArchive})
           </button>
         </div>
         <div className="overflow-x-auto">
