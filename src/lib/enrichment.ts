@@ -24,23 +24,7 @@ export async function fetchHtml(url: string) {
   }
 }
 
-export async function checkUrlExists(url: string) {
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
-    const res = await fetch(url.startsWith('http') ? url : `https://${url}`, {
-      method: 'HEAD',
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-      },
-      signal: controller.signal
-    });
-    clearTimeout(timeoutId);
-    return res.ok;
-  } catch {
-    return false;
-  }
-}
+
 
 export function extractSocials(html: string) {
   const $ = cheerio.load(html);
@@ -62,10 +46,7 @@ export function extractSocials(html: string) {
   return { instagram, facebook };
 }
 
-export function generateGuesses(businessName: string): string[] {
-  const base = businessName.toLowerCase().replace(/[^a-z0-9]/g, '');
-  return [base, `${base}salon`, `${base}studio`, `${base}beauty`, `the${base}`];
-}
+
 
 export async function findSocialsWaterfall(websiteUrl: string | null, businessName: string, location: string) {
   let html = null;
@@ -85,18 +66,7 @@ export async function findSocialsWaterfall(websiteUrl: string | null, businessNa
     }
   }
 
-  // 2. URL Guess
-  const guesses = generateGuesses(businessName);
-  for (const guess of guesses) {
-    const igUrl = `https://instagram.com/${guess}`;
-    if (await checkUrlExists(igUrl)) {
-      return { url: igUrl, platform: 'Instagram', source: 'URL Guess', htmlCache: html };
-    }
-    const fbUrl = `https://facebook.com/${guess}`;
-    if (await checkUrlExists(fbUrl)) {
-      return { url: fbUrl, platform: 'Facebook', source: 'URL Guess', htmlCache: html };
-    }
-  }
+
 
   // 3. DuckDuckGo HTML Fallback
   const ddgQuery = `"${businessName}" "${location}" instagram`;
