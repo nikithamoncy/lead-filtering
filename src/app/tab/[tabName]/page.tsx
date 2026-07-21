@@ -57,6 +57,7 @@ export default function TabDashboard({ params }: { params: Promise<{ tabName: st
   const stage4Pending = rows.filter(r => !!r['Site Url'] && !r['Booking Platform']).length;
   
   const toArchive = rows.filter(r => r['Rating Status'] === 'Fail' || r['Social Status'] === 'Fail').length;
+  const toArchiveSocialApprove = rows.filter(r => r['Social Approve']?.toString().trim().toLowerCase() === 'fail').length;
 
   const summary = {
     total: rows.length,
@@ -178,17 +179,30 @@ export default function TabDashboard({ params }: { params: Promise<{ tabName: st
       <div className="mb-8 bg-white rounded-xl border border-gray-200 overflow-hidden">
         <div className="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
           <h2 className="font-semibold">Rows Preview</h2>
-          <button 
-            disabled={!!actionInProgress || toArchive === 0}
-            onClick={() => {
-              if (confirm(`Archive ${toArchive} failed rows?`)) {
-                runStage('archive');
-              }
-            }}
-            className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-700 disabled:opacity-50"
-          >
-            Archive Failed Rows (up to 100 at a time, total {toArchive})
-          </button>
+          <div className="flex space-x-2">
+            <button 
+              disabled={!!actionInProgress || toArchiveSocialApprove === 0}
+              onClick={() => {
+                if (confirm(`Delete ${toArchiveSocialApprove} rejected social rows permanently?`)) {
+                  runStage('archive-social');
+                }
+              }}
+              className="bg-orange-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-orange-700 disabled:opacity-50"
+            >
+              Delete Rejected Socials (total {toArchiveSocialApprove})
+            </button>
+            <button 
+              disabled={!!actionInProgress || toArchive === 0}
+              onClick={() => {
+                if (confirm(`Archive ${toArchive} failed rows?`)) {
+                  runStage('archive');
+                }
+              }}
+              className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-700 disabled:opacity-50"
+            >
+              Archive Failed Rows (up to 100 at a time, total {toArchive})
+            </button>
+          </div>
         </div>
         <div className="overflow-x-auto">
           {loading ? (
