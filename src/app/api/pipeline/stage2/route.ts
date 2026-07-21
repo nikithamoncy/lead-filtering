@@ -24,6 +24,18 @@ export async function POST(request: NextRequest) {
         continue;
       }
 
+      // If Insta Url is already provided manually, just mark it as Pass and skip searching
+      const existingInsta = row.get('Insta Url');
+      if (existingInsta && existingInsta.trim() !== '') {
+        row.set('Social Status', 'Pass');
+        row.set('Social Source', 'Manual/Existing');
+        row.set('Enrichment Date', new Date().toISOString());
+        await row.save();
+        processedCount++;
+        await delay(500);
+        continue;
+      }
+
       const website = row.get('Site Url') || null;
       const businessName = row.get('Name') || '';
       const location = row.get('Address') || '';
