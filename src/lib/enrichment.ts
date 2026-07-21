@@ -1,5 +1,5 @@
 import * as cheerio from 'cheerio';
-import { searchDuckDuckGo, searchBrave } from './searchApis';
+import { searchDuckDuckGo, searchBrave, searchApifyGoogle } from './searchApis';
 
 const BOOKING_KEYWORDS = [
   'fresha', 'booksy', 'vagaro', 'glossgenius', 'boulevard', 
@@ -67,6 +67,18 @@ export async function findSocialsWaterfall(websiteUrl: string | null, businessNa
   }
 
 
+
+  // 2. Apify Google Search (Highly Accurate)
+  const apifyQuery = `"${businessName}" "${location}" instagram`;
+  const apifyLinks = await searchApifyGoogle(apifyQuery);
+  const apifyIgLink = apifyLinks.find(l => l.includes('instagram.com/') && !l.includes('/p/'));
+  if (apifyIgLink) {
+    return { url: apifyIgLink.split('?')[0].replace(/\/$/, ''), platform: 'Instagram', source: 'Apify API', htmlCache: html };
+  }
+  const apifyFbLink = apifyLinks.find(l => l.includes('facebook.com/') && !l.includes('/events/'));
+  if (apifyFbLink) {
+    return { url: apifyFbLink.split('?')[0], platform: 'Facebook', source: 'Apify API', htmlCache: html };
+  }
 
   // 3. DuckDuckGo HTML Fallback
   const ddgQuery = `"${businessName}" "${location}" instagram`;
