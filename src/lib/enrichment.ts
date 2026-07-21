@@ -68,34 +68,15 @@ export async function findSocialsWaterfall(websiteUrl: string | null, businessNa
 
 
 
-  // 2. Apify Google Search (Highly Accurate)
-  const apifyQuery = `"${businessName}" "${location}" instagram`;
+
+
+  // 2. Apify Google Search (Replicating n8n exactly)
+  const apifyQuery = `${businessName} ${location} instagram`.trim();
   const apifyLinks = await searchApifyGoogle(apifyQuery);
-  const apifyIgLink = apifyLinks.find(l => l.includes('instagram.com/') && !l.includes('/p/'));
+  const apifyIgLink = apifyLinks.find(l => l.includes('instagram.com'));
   if (apifyIgLink) {
     return { url: apifyIgLink.split('?')[0].replace(/\/$/, ''), platform: 'Instagram', source: 'Apify API', htmlCache: html };
   }
-  const apifyFbLink = apifyLinks.find(l => l.includes('facebook.com/') && !l.includes('/events/'));
-  if (apifyFbLink) {
-    return { url: apifyFbLink.split('?')[0], platform: 'Facebook', source: 'Apify API', htmlCache: html };
-  }
-
-  // 3. DuckDuckGo HTML Fallback
-  const ddgQuery = `"${businessName}" "${location}" instagram`;
-  const ddgLinks = await searchDuckDuckGo(ddgQuery);
-  const igLink = ddgLinks.find(l => l.includes('instagram.com/') && !l.includes('/p/'));
-  if (igLink) return { url: igLink, platform: 'Instagram', source: 'DuckDuckGo', htmlCache: html };
-  
-  const fbLink = ddgLinks.find(l => l.includes('facebook.com/') && !l.includes('/events/'));
-  if (fbLink) return { url: fbLink, platform: 'Facebook', source: 'DuckDuckGo', htmlCache: html };
-
-  // 4. Search API (Brave)
-  const braveLinks = await searchBrave(ddgQuery);
-  const braveIgLink = braveLinks.find(l => l.includes('instagram.com/'));
-  if (braveIgLink) return { url: braveIgLink, platform: 'Instagram', source: 'Search API', htmlCache: html };
-
-  const braveFbLink = braveLinks.find(l => l.includes('facebook.com/'));
-  if (braveFbLink) return { url: braveFbLink, platform: 'Facebook', source: 'Search API', htmlCache: html };
 
   return { url: null, platform: 'None', source: 'None', htmlCache: html };
 }
