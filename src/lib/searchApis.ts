@@ -59,11 +59,15 @@ export async function searchApifyGoogle(query: string): Promise<string[]> {
   if (!token) return [];
 
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 60000);
+
     const res = await fetch(`https://api.apify.com/v2/acts/apify~google-search-scraper/run-sync-get-dataset-items?token=${token}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
+      signal: controller.signal,
       body: JSON.stringify({
         "focusOnPaidAds": false,
         "forceExactMatch": false,
@@ -78,9 +82,14 @@ export async function searchApifyGoogle(query: string): Promise<string[]> {
         "saveHtmlToKeyValueStore": false
       })
     });
+    clearTimeout(timeoutId);
 
     if (!res.ok) {
-      console.error('Apify API error:', await res.text());
+      const text = await res.text();
+      if (res.status === 402 || text.toLowerCase().includes('credit') || text.toLowerCase().includes('exceeded')) {
+        throw new Error('APIFY_CREDITS_EXPIRED');
+      }
+      console.error('Apify API error:', text);
       return [];
     }
     
@@ -90,7 +99,9 @@ export async function searchApifyGoogle(query: string): Promise<string[]> {
     // Apify dataset items have an array of organicResults for each query
     const results = items[0]?.organicResults || [];
     return results.map((r: any) => r.url).filter(Boolean);
-  } catch (err) {
+  } catch (err: any) {
+    if (err.message === 'APIFY_CREDITS_EXPIRED') throw err;
+    if (err.name === 'AbortError') throw new Error('APIFY_TIMEOUT');
     console.error('Apify fetch error:', err);
     return [];
   }

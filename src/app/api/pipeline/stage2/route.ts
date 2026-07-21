@@ -40,8 +40,19 @@ export async function POST(request: NextRequest) {
       const businessName = row.get('Name') || '';
       const location = row.get('Address') || '';
 
-      const { url, platform, source } = await findSocialsWaterfall(website, businessName, location);
+      let socials: any = { url: null, platform: 'None', source: 'None' };
+      try {
+        socials = await findSocialsWaterfall(website, businessName, location);
+      } catch (err: any) {
+        if (err.message === 'APIFY_TIMEOUT') {
+          break; // Stop batch gracefully, leaving this row's social status blank
+        } else if (err.message === 'APIFY_CREDITS_EXPIRED') {
+          return NextResponse.json({ success: false, error: 'APIFY_CREDITS_EXPIRED' }, { status: 402 });
+        }
+        throw err;
+      }
       
+      const { url, platform, source } = socials;
       if (url) {
         row.set('Insta Url', url);
         row.set('Social Source', source);
@@ -62,6 +73,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, processedCount });
   } catch (error: any) {
     console.error('Error running stage 2:', error);
+    if (error.message === 'APIFY_CREDITS_EXPIRED') {
+      return NextResponse.json({ success: false, error: 'APIFY_CREDITS_EXPIRED' }, { status: 402 });
+    }
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

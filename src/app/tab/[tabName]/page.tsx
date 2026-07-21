@@ -42,7 +42,10 @@ export default function TabDashboard({ params }: { params: Promise<{ tabName: st
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tabName: decodedTabName, batchSize: size })
       });
-      await res.json();
+      const data = await res.json();
+      if (!data.success && data.error === 'APIFY_CREDITS_EXPIRED') {
+        alert('⚠️ APIFY CREDITS EXPIRED ⚠️\n\nPlease add more credits to your Apify account to continue finding Instagram URLs via Google Search.');
+      }
       await fetchRows();
     } catch (e) {
       console.error(e);

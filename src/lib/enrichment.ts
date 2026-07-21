@@ -70,7 +70,24 @@ export async function findSocialsWaterfall(websiteUrl: string | null, businessNa
 
 
 
-  // 2. Apify Google Search (Replicating n8n exactly)
+  // 2. DuckDuckGo HTML Fallback
+  const ddgQuery = `"${businessName}" "${location}" instagram`;
+  const ddgLinks = await searchDuckDuckGo(ddgQuery);
+  const igLink = ddgLinks.find(l => l.includes('instagram.com/') && !l.includes('/p/'));
+  if (igLink) return { url: igLink, platform: 'Instagram', source: 'DuckDuckGo', htmlCache: html };
+  
+  const fbLink = ddgLinks.find(l => l.includes('facebook.com/') && !l.includes('/events/'));
+  if (fbLink) return { url: fbLink, platform: 'Facebook', source: 'DuckDuckGo', htmlCache: html };
+
+  // 3. Search API (Brave)
+  const braveLinks = await searchBrave(ddgQuery);
+  const braveIgLink = braveLinks.find(l => l.includes('instagram.com/'));
+  if (braveIgLink) return { url: braveIgLink, platform: 'Instagram', source: 'Search API', htmlCache: html };
+
+  const braveFbLink = braveLinks.find(l => l.includes('facebook.com/'));
+  if (braveFbLink) return { url: braveFbLink, platform: 'Facebook', source: 'Search API', htmlCache: html };
+
+  // 4. Apify Google Search (Replicating n8n exactly as last resort)
   const apifyQuery = `${businessName} ${location} instagram`.trim();
   const apifyLinks = await searchApifyGoogle(apifyQuery);
   const apifyIgLink = apifyLinks.find(l => l.includes('instagram.com'));
