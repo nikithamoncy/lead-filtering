@@ -57,7 +57,10 @@ export default function TabDashboard({ params }: { params: Promise<{ tabName: st
   const stage4Pending = rows.filter(r => !!r['Site Url'] && !r['Booking Platform']).length;
   
   const toArchive = rows.filter(r => r['Rating Status'] === 'Fail' || r['Social Status'] === 'Fail').length;
-  const toArchiveSocialApprove = rows.filter(r => r['Social Approve']?.toString().trim().toLowerCase() === 'fail').length;
+  const toArchiveSocialApprove = rows.filter(r => {
+    const key = Object.keys(r).find(k => k.toLowerCase() === 'social approve');
+    return key ? r[key]?.toString().trim().toLowerCase() === 'fail' : false;
+  }).length;
 
   const summary = {
     total: rows.length,

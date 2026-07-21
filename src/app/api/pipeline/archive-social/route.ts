@@ -20,7 +20,9 @@ export async function POST(request: NextRequest) {
       if (deletedCount >= batchSize) break;
       const row = rows[i];
       
-      const socialApprove = row.get('Social Approve')?.toString().trim().toLowerCase();
+      const rowData = row.toObject();
+      const socialApproveKey = Object.keys(rowData).find(k => k.toLowerCase() === 'social approve');
+      const socialApprove = socialApproveKey ? rowData[socialApproveKey]?.toString().trim().toLowerCase() : undefined;
       
       if (socialApprove === 'fail') {
         await row.delete();
