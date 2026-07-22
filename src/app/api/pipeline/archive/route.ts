@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getRows, getWorksheetByTitle, getGoogleDoc } from '@/lib/sheets';
+import { getRows, getGoogleDoc } from '@/lib/sheets';
+
+export const maxDuration = 60;
+
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,6 +27,7 @@ export async function POST(request: NextRequest) {
       if (ratingStatus === 'Fail' || socialStatus === 'Fail') {
         await row.delete();
         deletedCount++;
+        await delay(500); // Prevent Google Sheets rate limits
       }
     }
 

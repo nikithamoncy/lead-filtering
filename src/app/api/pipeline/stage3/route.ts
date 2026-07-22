@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getRows, getWorksheetByTitle } from '@/lib/sheets';
 import { searchDuckDuckGo } from '@/lib/searchApis';
 
+export const maxDuration = 60;
+
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 export async function POST(request: NextRequest) {
   try {
     const { tabName, batchSize = 20 } = await request.json();
@@ -37,6 +41,7 @@ export async function POST(request: NextRequest) {
       row.set('Enrichment Date', new Date().toISOString());
       await row.save();
       processedCount++;
+      await delay(500); // Prevent Google Sheets rate limits
     }
 
     return NextResponse.json({ success: true, processedCount });

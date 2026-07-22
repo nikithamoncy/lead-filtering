@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getRows, getGoogleDoc } from '@/lib/sheets';
 
+export const maxDuration = 60;
+
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 export async function POST(request: NextRequest) {
   try {
     const { tabName, batchSize = 100 } = await request.json();
@@ -27,6 +31,7 @@ export async function POST(request: NextRequest) {
       if (socialApprove === 'fail') {
         await row.delete();
         deletedCount++;
+        await delay(500); // Prevent Google Sheets rate limits
       }
     }
 

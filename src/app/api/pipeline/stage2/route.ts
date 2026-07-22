@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getRows, getWorksheetByTitle } from '@/lib/sheets';
 import { findSocialsWaterfall } from '@/lib/enrichment';
 
+export const maxDuration = 60;
+
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export async function POST(request: NextRequest) {

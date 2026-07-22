@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getRows, getWorksheetByTitle } from '@/lib/sheets';
 
+export const maxDuration = 60;
+
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 export async function POST(request: NextRequest) {
   try {
     const { tabName, batchSize = 100 } = await request.json();
@@ -48,6 +52,7 @@ export async function POST(request: NextRequest) {
       
       await row.save();
       processedCount++;
+      await delay(500); // Prevent Google Sheets rate limits
     }
 
     return NextResponse.json({ success: true, processedCount });
