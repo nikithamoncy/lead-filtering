@@ -88,7 +88,45 @@ export default function TabDashboard({ params }: { params: Promise<{ tabName: st
         <div><div className="text-sm text-gray-500">Stage 2 Fail</div><div className="text-2xl text-red-600">{summary.stage2Fail}</div></div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+        <div className="bg-white p-4 rounded-xl border border-gray-200 flex flex-col justify-between">
+          <div>
+            <h3 className="font-semibold mb-2">0. Remove Duplicates</h3>
+            <p className="text-sm text-gray-500 mb-4">Checks entire sheet based on Name</p>
+            <div className="mb-4 text-xs text-gray-400">
+              No batch size needed. This checks the whole sheet at once.
+            </div>
+          </div>
+          <button 
+            disabled={!!actionInProgress}
+            onClick={async () => {
+              if (confirm('Are you sure you want to scan for and delete duplicate names across the entire sheet?')) {
+                setActionInProgress('remove-duplicates');
+                try {
+                  const res = await fetch(`/api/pipeline/remove-duplicates`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tabName: decodedTabName })
+                  });
+                  const data = await res.json();
+                  if (data.success) {
+                    alert(`Removed ${data.deletedCount} duplicates!`);
+                  } else {
+                    alert(`Error: ${data.error}`);
+                  }
+                  await fetchRows();
+                } catch (e) {
+                  console.error(e);
+                }
+                setActionInProgress(null);
+              }
+            }}
+            className="bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 disabled:opacity-50"
+          >
+            {actionInProgress === 'remove-duplicates' ? 'Running...' : 'Run Deduplication'}
+          </button>
+        </div>
+
         <div className="bg-white p-4 rounded-xl border border-gray-200 flex flex-col justify-between">
           <div>
             <h3 className="font-semibold mb-2">1. Rating Filter</h3>
