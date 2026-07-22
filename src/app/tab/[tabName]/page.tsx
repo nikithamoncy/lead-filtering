@@ -238,13 +238,13 @@ export default function TabDashboard({ params }: { params: Promise<{ tabName: st
             <button 
               disabled={!!actionInProgress || toArchive === 0}
               onClick={() => {
-                if (confirm(`Archive ${toArchive} failed rows?`)) {
+                if (confirm(`Delete ${toArchive} failed rows permanently?`)) {
                   runStage('archive');
                 }
               }}
               className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-700 disabled:opacity-50"
             >
-              Archive Failed Rows (up to 100 at a time, total {toArchive})
+              Delete Failed Rows (up to 100 at a time, total {toArchive})
             </button>
           </div>
         </div>
